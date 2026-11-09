@@ -52,6 +52,11 @@ is the symbol `empty`, length `none`, and the head is a special operator.
 expect the head to be a macro. It stops at `nil` and returns `nil`. That is
 `null` with length 0.
 
+I predicted the operator was `macro` and CLISP printed `special-operator`. I
+read Chapter 7's description of `and` as a macro and did not account for the
+course rule that asks about special operators first. The value, kind, and
+length I got right.
+
 ## P10
 
 `(progn ...)` has `progn` as its head, a special operator. `defvar` makes
@@ -65,13 +70,21 @@ length `none`, and the head is a special operator.
 `defun` a macro, so I expect the head to be a macro. It returns the symbol
 `ps3-twice`, so length is `none`.
 
+I predicted the operator was `macro` and CLISP printed `special-operator`. I
+knew the standard calls `defun` a macro, but CLISP answers `special-operator`
+under the special-operator-first rule. The value, kind, and length I got right.
+
 ## P12
 
 `(labels ((down (n) ...)) (down 3))` has `labels` as its head. I read `labels`
 as an ordinary function taking local definitions, so the head would be a
 function. It returns `(3 2 1)`, a cons of length 3.
 
-## P3
+I predicted the operator was `function` and CLISP printed `special-operator`. I
+read `labels` as an ordinary function taking local definitions; it is a special
+operator. The value, kind, and length I got right.
+
+## P13
 
 `(mapcar #'length '((1 2) () (3)))` has `mapcar` as its head, a function. It
 takes the length of each element: 2, 0, 1. The result is `(2 0 1)`, a cons of
