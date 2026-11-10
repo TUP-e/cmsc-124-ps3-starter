@@ -56,16 +56,32 @@ OP is the symbol +, -, or *. Signal an error for anything else."
 
 MAPCAR takes two lists and #'CONS pairs them. Build a new list. Do not modify
 ENV, because the caller keeps using it after the extension goes out of scope."
-  (declare (ignore params args env))
-  (error "extend-env is not implemented"))
+
+  (append(mapcar #'cons params args) env)  
+)
 
 (defun eval-let (expr env)
   "Evaluate (let ((name init) ...) body).
 
 Every init is evaluated in ENV before any name is bound, so the bindings happen
 in parallel and an init cannot see a name the same LET introduces."
-  (declare (ignore expr env))
-  (error "eval-let is not implemented"))
+
+  (let ((bndg (second expr))
+        (body (third expr)))
+        
+    
+    (let ((names (mapcar #'first bndg))
+          (inits (mapcar #'second bndg)))
+
+      ;; evaluate in env before the new env          
+      (let ((values (eval-operands inits env)))
+
+        ;; new-env
+        (let ((new-env (extend-env names values env)))
+        
+          ;; evaluate body using new-env
+          (eval-expr body new-env)))))
+)
 
 ;;; E4 -- lambda and application.
 
@@ -95,8 +111,15 @@ CLOSURE is not a closure, and when the argument count does not match."
 Order the branches with care. NIL is a symbol as well as the empty list, and a
 number is not a cons, so the atom tests come before the list tests."
   (cond
+
     ((numberp expr) expr)
     ((symbolp expr) (lookup expr env))
+
     ((member (car expr) '(+ - *) :test #'eql)
      (apply-op (car expr) (eval-operands (cdr expr) env)))
+
+    ((eql (car expr) 'let)
+      (eval-let expr env))
+    
+    
     (t (error "Cannot evaluate: ~S" expr))))
