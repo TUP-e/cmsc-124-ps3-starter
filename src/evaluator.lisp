@@ -37,15 +37,17 @@ name. Signal an error when NAME is not bound at all."
 
 MAPCAR and a LAMBDA do this in one line. Watch the arity: EVAL-EXPR takes two
 arguments and MAPCAR hands its function one."
-  (declare (ignore exprs env))
-  (error "eval-operands is not implemented"))
+  (mapcar (lambda (e) (eval-expr e env)) exprs))
 
 (defun apply-op (op values)
   "Apply the arithmetic operator OP to the two numbers in VALUES.
 
 OP is the symbol +, -, or *. Signal an error for anything else."
-  (declare (ignore op values))
-  (error "apply-op is not implemented"))
+  (destructuring-bind (a b) values
+    (cond ((eql op '+) (+ a b))
+          ((eql op '-) (- a b))
+          ((eql op '*) (* a b))
+          (t (error "Unknown operator: ~S" op)))))
 
 ;;; E3 -- let.
 
