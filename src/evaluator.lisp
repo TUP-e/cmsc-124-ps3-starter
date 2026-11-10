@@ -26,8 +26,9 @@
 
 The first match wins, so an inner binding shadows an outer one that shares its
 name. Signal an error when NAME is not bound at all."
-  (declare (ignore name env))
-  (error "lookup is not implemented"))
+  (cond ((null env) (error "Unbound symbol: ~S" name))
+        ((eql (caar env) name) (cdar env))
+        (t (lookup name (cdr env)))))
 
 ;;; E2 -- prefix arithmetic.
 
