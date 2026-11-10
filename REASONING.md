@@ -8,19 +8,38 @@ so length is `none` and the head is a function.
 
 ## P02
 
-`''(+ 1 2)` has `quote` as its head. The outer quote returns the inner form
-`(quote (+ 1 2))` untouched. That list has two elements: `quote` and `(+ 1 2)`.
-So it is a cons of length 2, and the head is a special operator.
+`''(+ 1 2)` — the corpus's outer quote stores the form, so what `./run`
+evaluates is `(quote (+ 1 2))`. Its head is `quote`, a special operator, which
+returns its argument `(+ 1 2)`. That is a three-element list, so kind is `cons`,
+length is 3, and the head is a special operator.
+
+I predicted the value `(quote,(+,1,2))` with length 2 and CLISP printed
+`(+,1,2)` with length 3. I read the inner quote as if it survived evaluation.
+The rule I misread: the corpus's outer quote is consumed at load time, so
+`./run` evaluates `(quote (+ 1 2))`, whose value is the three-element list
+`(+ 1 2)`.
 
 ## P03
 
-`'nil` has `quote` as its head, which returns `nil` untouched. `nil` is the
-empty list, so kind is `null` and length is 0. The head is a special operator.
+`'nil` — the corpus's quote stores the atom `nil`, so `./run` evaluates `nil`
+itself. It returns `nil`, the empty list: kind `null`, length 0. The form is an
+atom, so it has no head and operator is `none`.
+
+I predicted the operator was `special-operator` and CLISP printed `none`. I
+treated the corpus's storage quote as the head of the form being evaluated. The
+rule I misread: the corpus quote is consumed at load time, so `./run` sees the
+atom `nil`, which has no head.
 
 ## P04
 
-`'t` has `quote` as its head, which returns the symbol `t` untouched. That is a
-symbol, not a sequence, so length is `none`. The head is a special operator.
+`'t` — the corpus's quote stores the atom `t`, so `./run` evaluates `t` itself.
+It returns the symbol `t`, not a sequence, so kind is `symbol` and length is
+`none`. The form is an atom, so operator is `none`.
+
+I predicted the operator was `special-operator` and CLISP printed `none`. I
+treated the corpus's storage quote as the head of the form being evaluated. The
+rule I misread: the corpus quote is consumed at load time, so `./run` sees the
+atom `t`, which has no head.
 
 ## P05
 
@@ -66,13 +85,15 @@ length `none`, and the head is a special operator.
 
 ## P11
 
-`(defun ps3-twice (n) (* n 2))` has `defun` as its head. The standard calls
-`defun` a macro, so I expect the head to be a macro. It returns the symbol
-`ps3-twice`, so length is `none`.
+`(defun ps3-twice (n) (* n 2))` has `defun` as its head. `defun` is a macro in
+the standard, and unlike `and`, `labels`, and `progn`, CLISP keeps that
+classification. Its value is the symbol being defined, `ps3-twice`, so kind is
+`symbol` and length is `none`. The head is a macro.
 
-I predicted the operator was `macro` and CLISP printed `special-operator`. I
-knew the standard calls `defun` a macro, but CLISP answers `special-operator`
-under the special-operator-first rule. The value, kind, and length I got right.
+I predicted the operator was `special-operator` and CLISP printed `macro`. I
+applied the special-operator-first rule to `defun` without checking CLISP's
+actual classification. The rule I misread: `defun` is a macro in CLISP, not a
+special operator.
 
 ## P12
 
