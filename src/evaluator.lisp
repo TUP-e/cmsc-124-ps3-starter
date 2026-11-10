@@ -97,4 +97,6 @@ number is not a cons, so the atom tests come before the list tests."
   (cond
     ((numberp expr) expr)
     ((symbolp expr) (lookup expr env))
+    ((member (car expr) '(+ - *) :test #'eql)
+     (apply-op (car expr) (eval-operands (cdr expr) env)))
     (t (error "Cannot evaluate: ~S" expr))))
