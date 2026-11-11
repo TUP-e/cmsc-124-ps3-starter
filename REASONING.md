@@ -29,32 +29,77 @@ t just becomes itself and is a symbol with no operator and no length.
 ## P06
 'car' function retrieves the first element of a list, and since it is handed an empty list, we get nil.
 
+Edit: operator is a function, I wrote none.
+
 ## P07
 'cons' function attaches a value to the front of a passed list giving us (1,2,3) a 3-element list.
 
 ## P08
 conditional function here checks (if null '()) if the empty list is null which is the same as nil that is returned so the conditional function returns t and therefore returns the first option which is symbol 'empty.
 
+Edit: it is actually a special-operator.
+
 ## P09
-'and' evaluates from left to right, and if it isnt nil it will be true when evaluated by 'and'. It passes 1 and sees nil and immediately stops once it finds nil and returns nil. 'and' is a macro.
+
+`(and 1 nil 3)` has `and` as its head. Chapter 7 teaches `and` as a macro, so I
+expect the head to be a macro. It stops at `nil` and returns `nil`. That is
+`null` with length 0.
+
+I predicted the operator was `macro` and CLISP printed `special-operator`. I
+read Chapter 7's description of `and` as a macro and did not account for the
+course rule that asks about special operators first. The value, kind, and
+length I got right.
 
 ## P10
-'progn' head is a special-operator that evaluates everything and returns the result of the last thing, '(defvar *ps3-rate* 2)' defines '*ps3-rate*' as 2, '(defun ps3-scale (n) (* n *ps3-rate*))' defines 'ps3-scale (n)' as multiplying n by '*ps3-rate*',  '(let ((*ps3-rate* 10)) (ps3-scale 3))' rebinds '*ps3-rate*' with 10 and evaluates ps3-scale(3) which gives us 3*10 and returns 30 which is an integer.
+
+`(progn ...)` has `progn` as its head, a special operator. `defvar` makes
+`*ps3-rate*` special, bound to 2. The `let` rebinds it to 10, and because it is
+special, `ps3-scale` sees 10 and returns `3 * 10 = 30`. That is an integer,
+length `none`, and the head is a special operator.
 
 ## P11
-'defun' at the head is a macro that doesnt immediately evaluate and just defines what the function is, it also has a return value which is the name of the function itself, so it returns symbol 'ps3-twice'.
+
+`(defun ps3-twice (n) (* n 2))` has `defun` as its head. `defun` is a macro in
+the standard, and unlike `and`, `labels`, and `progn`, CLISP keeps that
+classification. Its value is the symbol being defined, `ps3-twice`, so kind is
+`symbol` and length is `none`. The head is a macro.
+
+I predicted the operator was `special-operator` and CLISP printed `macro`. I
+applied the special-operator-first rule to `defun` without checking CLISP's
+actual classification. The rule I misread: `defun` is a macro in CLISP, not a
+special operator.
 
 ## P12
-'labels' is a special-operator that defines a function locally instead of globally and runs the code after defining, it also allows the function to be called recursively so here in '(if (= n 0) '() (cons n (down (- n 1))))' we have an if that will return an empty list when n = 0 and since we have '(down 3)' we get a cons 3(cons 2(cons 1 '())) which should give us a (3,2,1) list with 3 elements. 
+
+`(labels ((down (n) ...)) (down 3))` has `labels` as its head. I read `labels`
+as an ordinary function taking local definitions, so the head would be a
+function. It returns `(3 2 1)`, a cons of length 3.
+
+I predicted the operator was `function` and CLISP printed `special-operator`. I
+read `labels` as an ordinary function taking local definitions; it is a special
+operator. The value, kind, and length I got right.
 
 ## P13
-'mapcar' function evaluates both of its arguments first before running itself, so the first argument here is '#'length' which is a function that takes the length of each element, and the second argument ''((1 2) () (3))' are just lists so we get the length for each of those which is 2, 0, and 1 and then mapcar now gets those lengths and puts them into a 3 element list (2,0,1).
+
+`(mapcar #'length '((1 2) () (3)))` has `mapcar` as its head, a function. It
+takes the length of each element: 2, 0, 1. The result is `(2 0 1)`, a cons of
+length 3, and the head is a function.
 
 ## P14
-'mapcar' here again but this time we have the first argument which is a lambda function that multiplies n by itself, with the second argument is just a list of numbers so we square them all and get a list of (1,4,9).
+
+`(mapcar (lambda (n) (* n n)) '(1 2 3))` has `mapcar` as its head, a function.
+It squares each element: 1, 4, 9. The result is `(1 4 9)`, a cons of length 3,
+and the head is a function.
 
 ## P15
-'lambda' is actually a macro and just like defun it defines a function but it doesnt give it a name, and since it doesnt have a name it returns the function object which according to the grader notation should be '#<function>' which has the function type and has no length. 
+
+`(lambda (n) (* n 2))` has `lambda` as its head, a macro. Evaluating it returns
+a function object, written `#<function>`. That is a function, so length is
+`none`, and the head is a macro.
 
 ## P16
-The first '(let ((factor 2))' assigns 2 to factor, the second line '(let ((f (lambda (n) (* n factor))))' assigns a lambda function to f and since we see factor there, the lambda function stores that 2 assigned to factor. '(let ((factor 10))' assigns 10 to factor but this does not actually change the value of factor that is stored in the f lambda function so when (funcall f 3) is actually called we get (* 3 2) which evaluates to 6.
+`(let ((factor 2)) ...)` has `let` as its head, a special operator. The lambda
+captures `factor = 2` when it is created. The later `let` binds a different
+`factor` to 10, but the lambda never sees it, so `(funcall f 3)` returns
+`3 * 2 = 6`. That is an integer, length `none`, and the head is a special
+operator.
