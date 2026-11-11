@@ -92,16 +92,37 @@ Return the list (:closure params body env). ENV is the environment the lambda
 was written in, not the one it will later be called from. Saving the wrong one
 is what makes the difference between 3 and 101 in the case the manual walks
 through."
-  (declare (ignore params body env))
-  (error "make-closure is not implemented"))
+  (list :closure params body env)
+)
 
 (defun apply-closure (closure args)
   "Run CLOSURE on ARGS.
 
 The parameters join the environment the closure captured. Signal an error when
 CLOSURE is not a closure, and when the argument count does not match."
-  (declare (ignore closure args))
-  (error "apply-closure is not implemented"))
+
+
+  ;; if checks if it is either not a list or not closure keyword
+  (if (or (not (listp closure)) (not (eql (first closure) :closure)))
+    (error "Not a closure")
+
+    ;; whole let is if it is false
+    (let ((params (second closure))
+          (body (third closure))
+          (env (fourth closure)))
+
+
+          (if (not (= (length params) (length args)))
+            (error "Number of parameters does not match number of arguments")
+
+
+            ;; new-env using env
+            (let ((new-env (extend-env params args env)))
+          
+          
+            (eval-expr body new-env))))
+    )
+)
 
 ;;; The dispatcher.
 
@@ -121,5 +142,12 @@ number is not a cons, so the atom tests come before the list tests."
     ((eql (car expr) 'let)
       (eval-let expr env))
     
-    
-    (t (error "Cannot evaluate: ~S" expr))))
+    ((eql (car expr) 'lambda)
+      (make-closure (second expr) (third expr) env))
+
+    (t (let ((closure (eval-expr (car expr) env))
+            (args (eval-operands (cdr expr) env)))
+        
+      (apply-closure closure args)))
+            
+    ))
